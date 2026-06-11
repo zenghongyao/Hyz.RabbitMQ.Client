@@ -1,0 +1,88 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12.0</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- NuGet 包元数据 -->
+    <PackageId>Hyz.RabbitMQ.Client</PackageId>
+    <Version>0.0.6</Version>
+    <Authors>hyz</Authors>
+    <Description>一个统一且优雅的RabbitMQ客户端库，支持源代码生成器、依赖注入、批处理和多连接管理.</Description>
+    <PackageTags>rabbitmq;messaging;client;source-generator;di;batch</PackageTags>
+    <RepositoryUrl>https://github.com/zenghongyao/Hyz.RabbitMQ.Client.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- 将引用项目的 DLL 打入包中 -->
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeReferencedProjectsInPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+  
+  <!-- 引入 README.md -->
+	<ItemGroup>
+		<None Include="../../README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+  <!--
+    引用所有子项目（PrivateAssets=all 禁止子项目本身作为 NuGet 依赖暴露）。
+    编译产物通过 BuildOutputInPackage MSBuild Target 打入包中。
+    子项目的外部 NuGet 依赖需在下方以 PackageReference 显式声明。
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Hyz.RabbitMQ.Abstractions\Hyz.RabbitMQ.Abstractions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hyz.RabbitMQ.Core\Hyz.RabbitMQ.Core.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hyz.RabbitMQ.Extensions\Hyz.RabbitMQ.Extensions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hyz.RabbitMQ.Serialization\Hyz.RabbitMQ.Serialization.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hyz.RabbitMQ.Subscriber\Hyz.RabbitMQ.Subscriber.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hyz.RabbitMQ.Generator\Hyz.RabbitMQ.Generator.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!--
+    显式声明子项目的外部 NuGet 依赖。
+    这些包会作为 Hyz.RabbitMQ.Client 的依赖项传递给消费者。
+  -->
+  <ItemGroup>
+    <!-- Abstractions / Core -->
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
+    <!-- Core / Extensions / Subscriber -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+    <!-- Extensions -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <!-- Subscriber -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <!-- Serialization -->
+    <PackageReference Include="MessagePack" Version="2.5.187" />
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+  </ItemGroup>
+
+  <!--
+    打包策略：
+    1. Abstractions/Core/Extensions/Serialization/Subscriber → lib/<tfm>/
+    2. Generator (Roslyn组件) → analyzers/dotnet/cs/ (不放入lib, 避免运行时依赖泄漏)
+    3. 所有外部 NuGet 依赖（RabbitMQ.Client, MessagePack 等）自动传递
+  -->
+
+  <Target Name="IncludeReferencedProjectsInPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <!-- 普通类库 DLL 及 XML 文档 → 打入 lib/<tfm>/ 目录 -->
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)"
+                            Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference'
+                                       AND '%(ReferenceCopyLocalPaths.Filename)' != 'Hyz.RabbitMQ.Generator'" />
+    </ItemGroup>
+    <ItemGroup>
+      <!-- 源码生成器 DLL → 打入 analyzers/dotnet/cs/ 目录 -->
+      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)"
+                              Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference'
+                                         AND '%(ReferenceCopyLocalPaths.Filename)' == 'Hyz.RabbitMQ.Generator'">
+        <PackagePath>analyzers/dotnet/cs/</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
+</Project>
