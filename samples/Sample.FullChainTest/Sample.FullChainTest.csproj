@@ -9,13 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Hyz.RabbitMQ.Abstractions\Hyz.RabbitMQ.Abstractions.csproj" />
-    <ProjectReference Include="..\..\src\Hyz.RabbitMQ.Core\Hyz.RabbitMQ.Core.csproj" />
-    <ProjectReference Include="..\..\src\Hyz.RabbitMQ.Extensions\Hyz.RabbitMQ.Extensions.csproj" />
-    <ProjectReference Include="..\..\src\Hyz.RabbitMQ.Serialization\Hyz.RabbitMQ.Serialization.csproj" />
-    <ProjectReference Include="..\..\src\Hyz.RabbitMQ.Subscriber\Hyz.RabbitMQ.Subscriber.csproj" />
-    <ProjectReference Include="..\..\src\Hyz.RabbitMQ.Generator\Hyz.RabbitMQ.Generator.csproj" 
-                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Hyz.RabbitMQ.Client" Version="0.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
   </ItemGroup>
 

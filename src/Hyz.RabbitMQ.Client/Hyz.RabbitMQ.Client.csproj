@@ -9,7 +9,7 @@
 
     <!-- NuGet 包元数据 -->
     <PackageId>Hyz.RabbitMQ.Client</PackageId>
-    <Version>0.0.6</Version>
+    <Version>0.0.8</Version>
     <Authors>hyz</Authors>
     <Description>一个统一且优雅的RabbitMQ客户端库，支持源代码生成器、依赖注入、批处理和多连接管理.</Description>
     <PackageTags>rabbitmq;messaging;client;source-generator;di;batch</PackageTags>
